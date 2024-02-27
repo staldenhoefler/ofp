@@ -1,1 +1,1 @@
-# ofp
+# Objektorientiert und Funktional programmieren
