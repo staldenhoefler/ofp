@@ -18,9 +18,6 @@ class Bank():
             self.__Konten[iban] = Jugendkonto(person, hashedPasswort)
         elif artDesKontos == 'Privatkonto':
             self.__Konten[iban] = Privatkonto(person, hashedPasswort, -1000)
-        elif artDesKontos == 'Sparkonto':
-            pass
-            # self.Konten[iban] = Sparkonto(person, passwort)
         else:
             print('Diese Art von Konto gibt es nicht')
 
@@ -85,10 +82,13 @@ class Bank():
                     person = input('Bitte geben Sie Ihren Namen ein: ')
                     passwort = input('Bitte geben Sie Ihr neues Passwort ein: ')
                     hashedPasswort = hash(passwort)
-                    self.__neuenKundenAnlegen(person, hashedPasswort)
-                    print('Wilkommen bei der Bank', self.name, person)
-                    passwortValidiert = True
-                    korrekteEingabe = True
+                    if self.__neuenKundenAnlegen(person, hashedPasswort):
+                        print('Wilkommen bei der Bank', self.name, person)
+                        passwortValidiert = True
+                        korrekteEingabe = True
+                    else:
+                        antwort = input('Möchten Sie es nochmals versuchen? 1: Ja, 2: Nein')
+                        korrekteEingabe = False
                 else:
                     print('Falsche Eingabe')
                     antwort = input('Möchten Sie es nochmals versuchen? 1: Ja, 2: Nein')
@@ -112,14 +112,11 @@ class Bank():
                         print('Welche Art von Konto möchten Sie eröffnen?')
                         print('1: Jugendkonto')
                         print('2: Privatkonto')
-                        print('3: Sparkonto')
                         antwort = input()
                         if antwort == '1':
                             self.kontoEröffnen(person, 'Jugendkonto', hashedPasswort)
                         elif antwort == '2':
                             self.kontoEröffnen(person, 'Privatkonto', hashedPasswort)
-                        elif antwort == '3':
-                            self.kontoEröffnen(person, 'Sparkonto', hashedPasswort)
                         else:
                             print('Falsche Eingabe')
                     else:
@@ -178,7 +175,12 @@ class Bank():
             random.choices(string.digits, k=1))
 
     def __neuenKundenAnlegen(self, person, passwort):
-        self.__Kunden[person] = {'Konten': [], 'Passwort': passwort}
+        if person not in self.__Kunden:
+            self.__Kunden[person] = {'Konten': [], 'Passwort': passwort}
+            return True
+        else:
+            print('Dieser Nutzername ist bereits vergeben.')
+            return False
 
     def __kontenAnzeigen(self, person):
         for konto in self.__Kunden[person]['Konten']:
