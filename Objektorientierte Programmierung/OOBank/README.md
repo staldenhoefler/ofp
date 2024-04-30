@@ -1,11 +1,11 @@
 # OOBank
 OOBank ist eine kleine Übungsaufgabe für das Objektorientierte Programmieren.
 ## Themen
-- [Usage](#usage)
+- [Verwendung](#Verwendung)
 - [Klassen](#klassen)
 
 
-## Usage
+## Verwendung
 Zum Starten des Programms muss nur das File `main.py` ausgeführt werden. 
 ```python
 from Bank import Bank
@@ -15,6 +15,9 @@ bank.interface()
 Jegliche Ein- und Ausgaben erfolgen über die Konsole. 
 
 ## Klassen
+UML Diagramm:
+![UML_OOBank.drawio.png](UML_OOBank.drawio.png)
+
 ### Bank
 Die Klasse `Bank` ist die Hauptklasse des Programms. Sie enthält alle Methoden, die für die Interaktion mit dem Benutzer notwendig sind.
 Sie übernimmt ebenfalls die Verwaltung der Kunden und Konten sowie die Verschlüsselung der Passwörter.
