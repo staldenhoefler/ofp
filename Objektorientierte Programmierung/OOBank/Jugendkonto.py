@@ -1,7 +1,7 @@
 from Konto import Konto
 class Jugendkonto(Konto):
-    def __init__(self, person, hashedPasswort):
-        super().__init__(person, hashedPasswort)
+    def __init__(self, hashedPasswort):
+        super().__init__(hashedPasswort)
 
     def auszahlen(self, betrag, art, hashedPasswort):
         if self.hashedPasswort == hashedPasswort:

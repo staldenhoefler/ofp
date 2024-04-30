@@ -1,6 +1,5 @@
 class Konto():
-    def __init__(self, person, hashedPasswort):
-        self.person = person
+    def __init__(self, hashedPasswort):
         self.hashedPasswort = hashedPasswort
         self.__kontostand = 0
         self.__buchungen = []

@@ -15,9 +15,9 @@ class Bank():
         self.__Kunden[person]['Konten'].append(iban)
 
         if artDesKontos == 'Jugendkonto':
-            self.__Konten[iban] = Jugendkonto(person, hashedPasswort)
+            self.__Konten[iban] = Jugendkonto(hashedPasswort)
         elif artDesKontos == 'Privatkonto':
-            self.__Konten[iban] = Privatkonto(person, hashedPasswort, -1000)
+            self.__Konten[iban] = Privatkonto(hashedPasswort, -1000)
         else:
             print('Diese Art von Konto gibt es nicht')
 
@@ -189,4 +189,4 @@ class Bank():
     def __InitialBankenkontoErstellen(self):
         self.__neuenKundenAnlegen('Admin', hash('Admin'))
         self.__Kunden['Admin']['Konten'].append('CH00 0000 0000 0000 0000 0')
-        self.__Konten['CH00 0000 0000 0000 0000 0'] = Jugendkonto('Admin', hash('Admin'))
+        self.__Konten['CH00 0000 0000 0000 0000 0'] = Jugendkonto(hash('Admin'))

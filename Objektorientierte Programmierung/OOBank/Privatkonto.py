@@ -1,7 +1,7 @@
 from Konto import Konto
 class Privatkonto(Konto):
-    def __init__(self, person, hashedPasswort, bezugslimite):
-        super().__init__(person, hashedPasswort)
+    def __init__(self, hashedPasswort, bezugslimite):
+        super().__init__(hashedPasswort)
         self.bezugslimite = bezugslimite
 
     def auszahlen(self, betrag, art, hashedPasswort):
