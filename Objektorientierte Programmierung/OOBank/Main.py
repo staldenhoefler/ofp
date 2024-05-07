@@ -1,3 +1,6 @@
 from Bank import Bank
+from Interface import Interface
 bank = Bank('UBS')
-bank.interface()
+
+interface = Interface(bank)
+interface.start()

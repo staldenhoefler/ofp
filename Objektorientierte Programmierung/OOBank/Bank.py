@@ -5,188 +5,107 @@ import string
 class Bank():
     def __init__(self, name):
         self.name = name
-        self.__Konten = dict()
-        self.__Kunden = dict()
-        self.__InitialBankenkontoErstellen()
-        self.__BankenKonto = self.__Kunden['Admin']['Konten'][0]
+        self.__account = dict()
+        self.__customer = dict()
+        self.__create_initial_bankaccount()
+        self.__initial_bankaccount = self.__customer['Admin']['Konten'][0]
 
-    def kontoEröffnen(self, person, artDesKontos, hashedPasswort):
-        iban = self.__generateIBAN()
-        self.__Kunden[person]['Konten'].append(iban)
+    def open_new_account(self, person, account_type, hashed_password):
+        iban = self.__generate_IBAN()
+        self.__customer[person]['Konten'].append(iban)
 
-        if artDesKontos == 'Jugendkonto':
-            self.__Konten[iban] = Jugendkonto(hashedPasswort)
-        elif artDesKontos == 'Privatkonto':
-            self.__Konten[iban] = Privatkonto(hashedPasswort, -1000)
+        if account_type == 'Jugendkonto':
+            self.__account[iban] = Jugendkonto(hashed_password)
+        elif account_type == 'Privatkonto':
+            self.__account[iban] = Privatkonto(hashed_password, -1000)
         else:
             print('Diese Art von Konto gibt es nicht')
 
-    def einzahlen(self, iban, betrag):
-        if betrag > 0:
-            self.__Konten[iban].einzahlen(betrag, 'Bareinzahlung')
-        else:
-            print('Betrag muss grösser als 0 sein')
+    def deposit(self, iban, value):
+        try:
+            self.__account[iban].deposit(value, 'Bareinzahlung')
+        except ValueError:
+            print(ValueError)
+        except KeyError:
+            print('Diese IBAN existiert nicht')
 
-    def buchung(self, iban, zielKonto, betrag, hashedPasswort):
-        if betrag > 0:
-            if self.__Konten[iban].auszahlen(betrag, f'Buchung an {zielKonto}', hashedPasswort):
-                self.__Konten[self.__BankenKonto].einzahlen(betrag * 0.005, f'Gebühr für Buchung von {iban} an {zielKonto}')
-                self.__Konten[zielKonto].einzahlen(betrag, f'Einzahlung von {iban}')
-        else:
-            print('Betrag muss grösser als 0 sein')
 
-    def kontostandAbfragen(self, iban, hashedPasswort):
-        return self.__Konten[iban].kontostandAbfragen(hashedPasswort)
 
-    def letzteBuchung(self, iban, hashedPasswort):
-        return self.__Konten[iban].letzteBuchung(hashedPasswort)
-
-    def kontoSchliessen(self, person, iban, hashedPasswort):
-        if self.__Konten[iban].hashedPasswort == hashedPasswort:
-            if self.kontostandAbfragen(iban, hashedPasswort) == 0:
-                self.__Konten.pop(iban)
-                self.__Kunden[person]['Konten'].remove(iban)
+    def transfer(self, iban, target_iban, value, hashed_password):
+        try:
+            if value > 0:
+                if self.__account[iban].transfer(value, f'Buchung an {target_iban}', hashed_password):
+                    self.__account[self.__initial_bankaccount].deposit(value * 0.005, f'Gebühr für Buchung von {iban} an {target_iban}')
+                    self.__account[target_iban].deposit(value, f'Einzahlung von {iban}')
             else:
-                print('Konto kann nur geschlossen werden, wenn der Kontostand 0 ist')
-        else:
-            print('Falsches Passwort, bitte neu einloggen.')
+                raise ValueError('Betrag muss grösser als 0 sein')
+        except ValueError:
+            print(ValueError)
+        except KeyError:
+            print('Eine der IBANs existiert nicht')
 
-    def interface(self):
-        while True:
-            passwortValidiert = False
-            person = ''
-            hashedPasswort = ''
+    def get_account_balance(self, iban, hashed_password):
+        try:
+            return self.__account[iban].get_account_balance(hashed_password)
+        except ValueError:
+            print(ValueError)
+        except KeyError:
+            print('Diese IBAN existiert nicht')
 
-            antwort = input(
-                f'Willkommen bei der Bank {self.name}. \n' +
-                'Wenn Sie bereits Kunde sind, können Sie das Single-Sign-On nutzen. Möchten Sie sich einloggen?\n' +
-                '1: Ja\n' +
-                '2: Ich bin ein neuer Kunde und möchte mich registrieren\n'
-            )
-            korrekteEingabe = False
-            while not korrekteEingabe:
-                if antwort == '1':
-                    while not passwortValidiert:
-                        person = input('Bitte geben Sie Ihren Namen ein: ')
-                        passwort = input('Bitte geben Sie Ihr Passwort ein: ')
-                        hashedPasswort = hash(passwort)
-                        if person in self.__Kunden and self.__Kunden[person]['Passwort'] == hashedPasswort:
-                            passwortValidiert = True
-                            korrekteEingabe = True
-                        else:
-                            print('Passwort oder Nutzername falsch')
-                            antwort = input('Möchten Sie es nochmals versuchen? 1: Ja, 2: Nein')
-                            if antwort == '2':
-                                break
-                elif antwort == '2':
-                    person = input('Bitte geben Sie Ihren Namen ein: ')
-                    passwort = input('Bitte geben Sie Ihr neues Passwort ein: ')
-                    hashedPasswort = hash(passwort)
-                    if self.__neuenKundenAnlegen(person, hashedPasswort):
-                        print('Wilkommen bei der Bank', self.name, person)
-                        passwortValidiert = True
-                        korrekteEingabe = True
-                    else:
-                        antwort = input('Möchten Sie es nochmals versuchen? 1: Ja, 2: Nein')
-                        korrekteEingabe = False
-                else:
-                    print('Falsche Eingabe')
-                    antwort = input('Möchten Sie es nochmals versuchen? 1: Ja, 2: Nein')
-                    korrekteEingabe = False
+    def last_transfer_info(self, iban, hashed_password):
+        try:
+            return self.__account[iban].last_transfer_info(hashed_password)
+        except ValueError:
+            print(ValueError)
+        except KeyError:
+            print('Diese IBAN existiert nicht')
 
-            while True:
-                print('Sie haben folgende Konten bei uns:')
-                self.__kontenAnzeigen(person)
-                print('Sie haben folgende Möglichkeiten:')
-                print('1: Konto eröffnen')
-                print('2: Bareinzahlung')
-                print('3: Buchung')
-                print('4: Kontostand abfragen')
-                print('5: Letzte Buchung abfragen')
-                print('6: Konto schliessen')
-                print('7: Beenden')
-                antwort = input()
+    def close_account(self, person, iban, hashed_password):
+        try:
+            if self.get_account_balance(iban, hashed_password) == 0:
+                self.__account.pop(iban)
+                self.__customer[person]['Konten'].remove(iban)
+            else:
+                raise ValueError('Konto kann nur geschlossen werden, wenn der Kontostand 0 ist')
+        except ValueError:
+            print(ValueError)
+        except KeyError:
+            print('Diese IBAN existiert nicht')
 
-                if antwort == '1':
-                    if passwortValidiert:
-                        print('Welche Art von Konto möchten Sie eröffnen?')
-                        print('1: Jugendkonto')
-                        print('2: Privatkonto')
-                        antwort = input()
-                        if antwort == '1':
-                            self.kontoEröffnen(person, 'Jugendkonto', hashedPasswort)
-                        elif antwort == '2':
-                            self.kontoEröffnen(person, 'Privatkonto', hashedPasswort)
-                        else:
-                            print('Falsche Eingabe')
-                    else:
-                        print('Sie müssen sich einloggen')
-                elif antwort == '2':
-                    if passwortValidiert:
-                        iban = input('Bitte geben Sie Ihre IBAN ein: ')
-                        betrag = input('Bitte geben Sie den Betrag ein: ')
-                        try:
-                            betrag = float(betrag)
-                            self.einzahlen(iban, betrag)
-                        except ValueError:
-                            print('Falsche Eingabe')
-                    else:
-                        print('Sie müssen sich einloggen')
-                elif antwort == '3':
-                    if passwortValidiert:
-                        iban = input('Bitte geben Sie Ihre IBAN ein: ')
-                        zielIban = input('Bitte geben Sie die Ziel-IBAN ein: ')
-                        betrag = input('Bitte geben Sie den Betrag ein: ')
-                        try:
-                            betrag = float(betrag)
-                            self.buchung(iban, zielIban, betrag, hashedPasswort)
-                        except ValueError:
-                            print('Falsche Eingabe')
-                    else:
-                        print('Sie müssen sich einloggen')
-                elif antwort == '4':
-                    if passwortValidiert:
-                        iban = input('Bitte geben Sie Ihre IBAN ein: ')
-                        print(self.kontostandAbfragen(iban, hashedPasswort))
-                    else:
-                        print('Sie müssen sich einloggen')
-                elif antwort == '5':
-                    if passwortValidiert:
-                        iban = input('Bitte geben Sie Ihre IBAN ein: ')
-                        print(self.letzteBuchung(iban, hashedPasswort))
-                    else:
-                        print('Sie müssen sich einloggen')
-                elif antwort == '6':
-                    if passwortValidiert:
-                        iban = input('Bitte geben Sie Ihre IBAN ein: ')
-                        self.kontoSchliessen(person, iban, hashedPasswort)
-                    else:
-                        print('Sie müssen sich einloggen')
-                elif antwort == '7':
-                    print('Auf Wiedersehen')
-                    break
-                else:
-                    print('Falsche Eingabe')
+    def login_customer(self, person, hashedPassword):
+        if person in self.__customer:
+            if self.__customer[person]['Passwort'] == hashedPassword:
+                return True
+        raise ValueError('Falscher Nutzername oder Passwort')
 
-    def __generateIBAN(self):
+    def add_new_customer(self, person, hashedPasswort):
+        if person not in self.__customer:
+            self.__customer[person] = {'Konten': [], 'Passwort': hashedPasswort}
+            return True
+        raise ValueError('Dieser Nutzername existiert bereits')
+
+
+    def __generate_IBAN(self):
         return 'CH' + ''.join(random.choices(string.digits, k=2)) + ' ' + ''.join(
             random.choices(string.digits, k=4)) + ' ' + ''.join(random.choices(string.digits, k=4)) + ' ' + ''.join(
             random.choices(string.digits, k=4)) + ' ' + ''.join(random.choices(string.digits, k=4)) + ' ' + ''.join(
             random.choices(string.digits, k=1))
 
-    def __neuenKundenAnlegen(self, person, passwort):
-        if person not in self.__Kunden:
-            self.__Kunden[person] = {'Konten': [], 'Passwort': passwort}
-            return True
-        else:
-            print('Dieser Nutzername ist bereits vergeben.')
-            return False
 
-    def __kontenAnzeigen(self, person):
-        for konto in self.__Kunden[person]['Konten']:
-            print(konto)
 
-    def __InitialBankenkontoErstellen(self):
-        self.__neuenKundenAnlegen('Admin', hash('Admin'))
-        self.__Kunden['Admin']['Konten'].append('CH00 0000 0000 0000 0000 0')
-        self.__Konten['CH00 0000 0000 0000 0000 0'] = Jugendkonto(hash('Admin'))
+    def show_accounts(self, person, hashed_password):
+        try:
+            if hashed_password == self.__customer[person]['Passwort']:
+                accounts = []
+                for account in self.__customer[person]['Konten']:
+                   accounts.append(account)
+                return accounts
+            else:
+                raise ValueError('Leider nicht eingeloggt.')
+        except KeyError:
+            print('Es ist ein Fehler unterlaufen. Bitte loggen Sie sich neu ein')
+
+    def __create_initial_bankaccount(self):
+        self.add_new_customer('Admin', hash('Admin'))
+        self.__customer['Admin']['Konten'].append('CH00 0000 0000 0000 0000 0')
+        self.__account['CH00 0000 0000 0000 0000 0'] = Jugendkonto(hash('Admin'))

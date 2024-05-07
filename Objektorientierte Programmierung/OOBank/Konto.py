@@ -1,24 +1,27 @@
 class Konto():
-    def __init__(self, hashedPasswort):
-        self.hashedPasswort = hashedPasswort
-        self.__kontostand = 0
-        self.__buchungen = []
+    def __init__(self, hashed_password):
+        self._hashed_password = hashed_password
+        self._balance = 0
+        self._transfer_info = []
 
-    def einzahlen(self, betrag, art):
-        self.__kontostand += betrag
-        self.__buchungen.append({'Art': art, 'Betrag': betrag})
+    def deposit(self, value, account_type):
+        if value > 0:
+            self._balance += value
+            self._transfer_info.append({'Art': account_type, 'Betrag': value})
+        else:
+            raise ValueError('Betrag muss grösser als 0 sein')
 
-    def auszahlen(self, betrag, art, hashedPasswort):
+    def transfer(self, value, account_type, hashed_password):
         pass
 
-    def kontostandAbfragen(self, hashedPasswort):
-        if self.hashedPasswort == hashedPasswort:
-            return self.__kontostand
+    def get_account_balance(self, hashed_password):
+        if self._hashed_password == hashed_password:
+            return self._balance
         else:
-            print('Falsches Passwort, bitte neu einloggen.')
+            raise ValueError('Falsches Passwort, bitte neu einloggen.')
 
-    def letzteBuchung(self, hashedPasswort):
-        if self.hashedPasswort == hashedPasswort:
-            return self.__buchungen[-1]
+    def last_transfer_info(self, hashed_password):
+        if self._hashed_password == hashed_password:
+            return self._transfer_info[-1]
         else:
-            print('Falsches Passwort, bitte neu einloggen.')
+            raise ValueError('Falsches Passwort, bitte neu einloggen.')
